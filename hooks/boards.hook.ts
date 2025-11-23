@@ -11,7 +11,6 @@ import { Board, CreateBoard, UpdateBoard } from "@/types/database.types";
 export const boardsKeys = {
   all: ["boards"] as const,
   lists: () => [...boardsKeys.all, "list"] as const,
-  list: (userID: string) => [...boardsKeys.lists(), userID] as const,
   details: () => [...boardsKeys.all, "detail"] as const,
   detail: (boardID: string) => [...boardsKeys.details(), boardID] as const,
 };
@@ -25,7 +24,7 @@ export const useBoards = (userID: string) => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: boardsKeys.list(userID),
+    queryKey: boardsKeys.lists(),
     queryFn: () => getBoardsByUser(userID),
     enabled: !!userID,
     staleTime: 5 * 60 * 1000,
@@ -34,13 +33,13 @@ export const useBoards = (userID: string) => {
   const createBoardMutation = useMutation({
     mutationFn: (data: CreateBoard) => createBoard(data, userID),
     onMutate: async (newBoard) => {
-      await queryClient.cancelQueries({ queryKey: boardsKeys.list(userID) });
+      await queryClient.cancelQueries({ queryKey: boardsKeys.lists() });
 
       const previousBoards = queryClient.getQueryData<Board[]>(
-        boardsKeys.list(userID)
+        boardsKeys.lists()
       );
 
-      queryClient.setQueryData<Board[]>(boardsKeys.list(userID), (old) => [
+      queryClient.setQueryData<Board[]>(boardsKeys.lists(), (old) => [
         ...(old || []),
         {
           ...newBoard,
@@ -55,13 +54,13 @@ export const useBoards = (userID: string) => {
     onError: (err, newBoard, context) => {
       if (context?.previousBoards) {
         queryClient.setQueryData(
-          boardsKeys.list(userID),
+          boardsKeys.lists(),
           context.previousBoards
         );
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: boardsKeys.list(userID) });
+      queryClient.invalidateQueries({ queryKey: boardsKeys.lists() });
     },
   });
 
@@ -69,17 +68,17 @@ export const useBoards = (userID: string) => {
     mutationFn: ({ boardID, data }: { boardID: string; data: UpdateBoard }) =>
       updateBoard(boardID, data),
     onMutate: async ({ boardID, data }) => {
-      await queryClient.cancelQueries({ queryKey: boardsKeys.list(userID) });
+      await queryClient.cancelQueries({ queryKey: boardsKeys.lists() });
       await queryClient.cancelQueries({ queryKey: boardsKeys.detail(boardID) });
 
       const previousBoards = queryClient.getQueryData<Board[]>(
-        boardsKeys.list(userID)
+        boardsKeys.lists()
       );
       const previousBoard = queryClient.getQueryData<Board>(
         boardsKeys.detail(boardID)
       );
 
-      queryClient.setQueryData<Board[]>(boardsKeys.list(userID), (old) => {
+      queryClient.setQueryData<Board[]>(boardsKeys.lists(), (old) => {
         if (!old) return old;
         return old.map((board) =>
           board.$id === boardID
@@ -98,7 +97,7 @@ export const useBoards = (userID: string) => {
     onError: (err, { boardID }, context) => {
       if (context?.previousBoards) {
         queryClient.setQueryData(
-          boardsKeys.list(userID),
+          boardsKeys.lists(),
           context.previousBoards
         );
       }
@@ -110,7 +109,7 @@ export const useBoards = (userID: string) => {
       }
     },
     onSuccess: (_, { boardID }) => {
-      queryClient.invalidateQueries({ queryKey: boardsKeys.list(userID) });
+      queryClient.invalidateQueries({ queryKey: boardsKeys.lists() });
       queryClient.invalidateQueries({ queryKey: boardsKeys.detail(boardID) });
     },
   });
@@ -118,14 +117,14 @@ export const useBoards = (userID: string) => {
   const deleteBoardMutation = useMutation({
     mutationFn: (boardID: string) => deleteBoard(boardID),
     onMutate: async (boardID) => {
-      await queryClient.cancelQueries({ queryKey: boardsKeys.list(userID) });
+      await queryClient.cancelQueries({ queryKey: boardsKeys.lists() });
 
       const previousBoards = queryClient.getQueryData<Board[]>(
-        boardsKeys.list(userID)
+        boardsKeys.lists()
       );
 
       queryClient.setQueryData<Board[]>(
-        boardsKeys.list(userID),
+        boardsKeys.lists(),
         (old) => old?.filter((board) => board.$id !== boardID) || []
       );
 
@@ -136,13 +135,13 @@ export const useBoards = (userID: string) => {
     onError: (err, boardID, context) => {
       if (context?.previousBoards) {
         queryClient.setQueryData(
-          boardsKeys.list(userID),
+          boardsKeys.lists(),
           context.previousBoards
         );
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: boardsKeys.list(userID) });
+      queryClient.invalidateQueries({ queryKey: boardsKeys.lists() });
     },
   });
 

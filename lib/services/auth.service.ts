@@ -1,7 +1,8 @@
-"user server"
+"use server"
 import { createAdminClient, createSessionClient } from "@/lib/appwrite/appwrite-server";
 import { ID } from "node-appwrite";
 import { cookies } from "next/headers";
+
 
 export const register = async (
   email: string,
