@@ -1,5 +1,6 @@
 "use client";
 
+import {toast } from "sonner";
 import {
   BadgeCheck,
   Bell,
@@ -7,7 +8,7 @@ import {
   CreditCard,
   LogOut,
 } from "lucide-react";
-
+import type { User } from "@/types/auth.types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -24,18 +25,36 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useRouter } from "next/navigation";
+import {useAuth} from "@/hooks/auth.hook";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-}) {
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
-
+  const initials = getInitials(user.name);
+  const { logoutMutation } = useAuth();
+  const router = useRouter();
+  
+  const handleLogout = () => {
+    try {
+      logoutMutation.mutate();
+      toast.success("Cierre de sesión exitoso");
+      router.push("/");
+    }
+    catch (error) {
+      toast.error("Error durante el cierre de sesión");
+      console.error("Error durante el cierre de sesión:", error);
+    }
+  };
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -46,8 +65,8 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                {/* <AvatarImage src={user.name} alt={user.name} /> */}
+                <AvatarFallback className="rounded-lg font-semibold">{initials}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -65,8 +84,8 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  {/* <AvatarImage src={user.name} alt="Sin nombre" /> */}
+                  <AvatarFallback className="rounded-lg font-semibold">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -78,7 +97,7 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheck />
-                Account
+                Cuenta
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCard />
@@ -90,9 +109,9 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
-              Log out
+              Cerrar sesión
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
