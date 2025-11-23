@@ -1,25 +1,73 @@
 "use client"
+
+import { useForm } from "@tanstack/react-form"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import * as z from "zod"
+import Link from "next/link"
+
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import Link from "next/link"
 import { useAuth } from "@/hooks/auth.hook"
-import type { MutationFunction } from "@tanstack/react-query";
+
+const formSchema = z.object({
+  email: z
+    .string()
+    .min(1, "El correo electrónico es requerido")
+    .email("Ingresa un correo electrónico válido"),
+  password: z
+    .string()
+    .min(1, "La contraseña es requerida")
+    .min(6, "La contraseña debe tener al menos 6 caracteres"),
+})
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
-  const { loginMutation, isLoading } = useAuth();
+  const { loginMutation } = useAuth()
+  const router = useRouter()
+
+  const form = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    validators: {
+      onSubmit: formSchema,
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        await loginMutation.mutateAsync({
+          email: value.email,
+          password: value.password,
+        })
+        toast.success("Inicio de sesión exitoso")
+        router.push("/dashboard")
+      } catch {
+        toast.error("Error al iniciar sesión. Verifica tus credenciales.")
+      }
+    },
+  })
+
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      onSubmit={(e) => {
+        e.preventDefault()
+        form.handleSubmit()
+      }}
+      {...props}
+    >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Inicia sesión en tu cuenta</h1>
@@ -27,26 +75,70 @@ export function LoginForm({
             Ingresa tu correo electrónico y contraseña para continuar
           </p>
         </div>
+
+        <form.Field name="email">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor="login-email">Correo electrónico</FieldLabel>
+                <Input
+                  id="login-email"
+                  name={field.name}
+                  type="email"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="m@example.com"
+                  autoComplete="email"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            )
+          }}
+        </form.Field>
+
+        <form.Field name="password">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid
+            return (
+              <Field data-invalid={isInvalid}>
+                <div className="flex items-center">
+                  <FieldLabel htmlFor="login-password">Contraseña</FieldLabel>
+                  <a
+                    href="#"
+                    className="ml-auto text-sm underline-offset-4 hover:underline"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </a>
+                </div>
+                <Input
+                  id="login-password"
+                  name={field.name}
+                  type="password"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  autoComplete="current-password"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            )
+          }}
+        </form.Field>
+
         <Field>
-          <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required />
+          <Button type="submit" disabled={loginMutation.isPending}>
+            {loginMutation.isPending ? "Iniciando sesión..." : "Iniciar sesión"}
+          </Button>
         </Field>
-        <Field>
-          <div className="flex items-center">
-            <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-            <a
-              href="#"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
-            >
-              ¿Olvidaste tu contraseña?
-            </a>
-          </div>
-          <Input id="password" type="password" required />
-        </Field>
-        <Field>
-          <Button type="submit">Iniciar sesión</Button>
-        </Field>
+
         <FieldSeparator>O continúa con</FieldSeparator>
+
         <Field>
           <Button variant="outline" type="button">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

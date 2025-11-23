@@ -1,21 +1,88 @@
+"use client"
+
+import { useForm } from "@tanstack/react-form"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import * as z from "zod"
+import Link from "next/link"
+
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import Link from "next/link"
+import { useAuth } from "@/hooks/auth.hook"
+
+const formSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, "El nombre es requerido")
+      .min(3, "El nombre debe tener al menos 3 caracteres"),
+    email: z
+      .string()
+      .min(1, "El correo electrónico es requerido")
+      .email("Ingresa un correo electrónico válido"),
+    password: z
+      .string()
+      .min(1, "La contraseña es requerida")
+      .min(8, "La contraseña debe tener al menos 8 caracteres"),
+    confirmPassword: z
+      .string()
+      .min(1, "Por favor confirma tu contraseña"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
+  })
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const { createUserMutation } = useAuth()
+  const router = useRouter()
+
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validators: {
+      onSubmit: formSchema,
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        await createUserMutation.mutateAsync({
+          name: value.name,
+          email: value.email,
+          password: value.password,
+        })
+        toast.success("Cuenta creada exitosamente")
+        router.push("/dashboard")
+      } catch {
+        toast.error("Error al crear la cuenta. Intenta de nuevo.")
+      }
+    },
+  })
+
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form
+      className={cn("flex flex-col gap-6", className)}
+      onSubmit={(e) => {
+        e.preventDefault()
+        form.handleSubmit()
+      }}
+      {...props}
+    >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Crea tu cuenta</h1>
@@ -23,34 +90,123 @@ export function SignupForm({
             Completa el formulario a continuación para crear tu cuenta
           </p>
         </div>
+
+        <form.Field name="name">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor="signup-name">Nombre completo</FieldLabel>
+                <Input
+                  id="signup-name"
+                  name={field.name}
+                  type="text"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="John Doe"
+                  autoComplete="name"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            )
+          }}
+        </form.Field>
+
+        <form.Field name="email">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor="signup-email">
+                  Correo electrónico
+                </FieldLabel>
+                <Input
+                  id="signup-email"
+                  name={field.name}
+                  type="email"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="m@example.com"
+                  autoComplete="email"
+                />
+                <FieldDescription>
+                  Usaremos este correo para contactarte. No compartiremos tu
+                  correo con nadie más.
+                </FieldDescription>
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            )
+          }}
+        </form.Field>
+
+        <form.Field name="password">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor="signup-password">Contraseña</FieldLabel>
+                <Input
+                  id="signup-password"
+                  name={field.name}
+                  type="password"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  autoComplete="new-password"
+                />
+                <FieldDescription>
+                  Debe tener al menos 8 caracteres.
+                </FieldDescription>
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            )
+          }}
+        </form.Field>
+
+        <form.Field name="confirmPassword">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor="signup-confirm-password">
+                  Confirma tu contraseña
+                </FieldLabel>
+                <Input
+                  id="signup-confirm-password"
+                  name={field.name}
+                  type="password"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  autoComplete="new-password"
+                />
+                <FieldDescription>
+                  Por favor confirma tu contraseña.
+                </FieldDescription>
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            )
+          }}
+        </form.Field>
+
         <Field>
-          <FieldLabel htmlFor="name">Nombre completo</FieldLabel>
-          <Input id="name" type="text" placeholder="John Doe" required />
+          <Button type="submit" disabled={createUserMutation.isPending}>
+            {createUserMutation.isPending ? "Creando cuenta..." : "Crear cuenta"}
+          </Button>
         </Field>
-        <Field>
-          <FieldLabel htmlFor="email">Correo electrónico</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required />
-          <FieldDescription>
-            Usaremos este correo para contactarte. No compartiremos tu correo
-            con nadie más.
-          </FieldDescription>
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="password">Contraseña</FieldLabel>
-          <Input id="password" type="password" required />
-          <FieldDescription>
-            Debe tener al menos 8 caracteres.
-          </FieldDescription>
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="confirm-password">Confirma tu contraseña</FieldLabel>
-          <Input id="confirm-password" type="password" required />
-          <FieldDescription>Por favor confirma tu contraseña.</FieldDescription>
-        </Field>
-        <Field>
-          <Button type="submit">Crear cuenta</Button>
-        </Field>
+
         <FieldSeparator>O continúa con</FieldSeparator>
+
         <Field>
           <Button variant="outline" type="button">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -61,8 +217,11 @@ export function SignupForm({
             </svg>
             Regístrate con GitHub
           </Button>
-          <FieldDescription className="px-6 text-center">
-            ¿Ya tienes una cuenta? <Link href="/login">Inicia sesión</Link>
+          <FieldDescription className="text-center">
+            ¿Ya tienes una cuenta?{" "}
+            <Link href="/login" className="underline underline-offset-4">
+              Inicia sesión
+            </Link>
           </FieldDescription>
         </Field>
       </FieldGroup>
