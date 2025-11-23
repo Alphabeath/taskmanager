@@ -1,14 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { login, register, logout, getCurrentUser } from '@/lib/services/auth.service';
+import { login, register, logout, getCurrentUser } from '@/services/auth.service';
 import { User } from '@/types/auth.types';
-
-export const authKeys = {
-  all: ['auth'] as const,
-  user: () => [...authKeys.all, 'user'] as const,
-};
-
+import { useRouter } from 'next/navigation';
+import { authKeys } from '@/types/key-query.types';
+import { boardsKeys } from '@/types/key-query.types';
 
 export const useAuth = () => {
+    const router = useRouter();
     const queryClient = useQueryClient();
 
     const { data: user, isLoading, refetch } = useQuery<User | null>({
@@ -37,7 +35,7 @@ export const useAuth = () => {
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: authKeys.user() });
-            refetch();
+            queryClient.invalidateQueries({ queryKey: boardsKeys.lists() });
         },
     });
 
@@ -46,9 +44,10 @@ export const useAuth = () => {
         onMutate: async () => {
             await queryClient.cancelQueries({ queryKey: authKeys.user() });
         },
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: authKeys.user() });
-            refetch();
+        onSuccess: () => {
+            queryClient.setQueryData(authKeys.user(), null);
+            queryClient.setQueryData(boardsKeys.lists(), null);
+            router.refresh()
         },
     });
 

@@ -30,27 +30,42 @@ export const register = async (
 export const login = async (email: string, password: string) => {
   const { account } = await createAdminClient();
   const session = await account.createEmailPasswordSession(email, password);
+  
+  // USAR LA MISMA LÓGICA DE SEGURIDAD QUE EN LOGOUT
+  const isProduction = process.env.NODE_ENV === "production";
+
   (await cookies()).set("session", session.secret, {
     httpOnly: true,
     path: "/",
-    secure: true
+    secure: isProduction, // Dinámico, igual que el logout
+    sameSite: "lax",      // Recomendado añadir esto
   });
   
   return { success: true };
 };
 
 export const logout = async () => {
+  // 1. Borrar sesión en Appwrite
   const { account } = await createSessionClient();
-  await account.deleteSession("current");
+  try {
+    await account.deleteSession("current");
+  } catch (error) {
+    // Ignoramos si ya no existe sesión en Appwrite para permitir limpiar la cookie
+    console.error("Error deleting session:", error); 
+  }
+
+  // 2. Borrar cookie usando el método nativo .delete()
+  // Esto limpia correctamente los atributos
   (await cookies()).delete("session");
-  
-  return { success: true };
 };
 
 export const getCurrentUser = async () => {
   try{
-  const { account } = await createSessionClient();
-  return await account.get();
+    const { account } = await createSessionClient();
+    const user = await account.get();
+    
+    // Serializa el usuario a un objeto plano
+    return JSON.parse(JSON.stringify(user));
   } catch {
     return null;
   }
@@ -59,7 +74,10 @@ export const getCurrentUser = async () => {
 export const getCurrentSession = async () => {
   try {
     const { account } = await createSessionClient();
-    return await account.getSession("current");
+    const session = await account.getSession("current");
+    
+    // Serializa la sesión a un objeto plano
+    return JSON.parse(JSON.stringify(session));
   } catch {
     return null;
   }

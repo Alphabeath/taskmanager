@@ -15,12 +15,8 @@ export async function createSessionClient() {
   }
 
   return {
-    get account() {
-      return new Account(client);
-    },
-    get tablesDB() {
-      return new TablesDB(client);
-    },
+    account: new Account(client),
+    tablesDB: new TablesDB(client),
   };
 }
 
@@ -31,22 +27,17 @@ export async function createAdminClient() {
     .setKey(process.env.NEXT_APPWRITE_API_KEY || "");
 
   return {
-    get account() {
-      return new Account(client);
-    },
-    get users() {
-      return new Users(client);
-    },
-    get tablesDB() {
-      return new TablesDB(client);
-    },
+    account: new Account(client),
+    users: new Users(client),
+    tablesDB: new TablesDB(client),
   };
 }
 
 export async function getLoggedInUser() {
   try {
     const { account } = await createSessionClient();
-    return await account.get();
+    const user = await account.get();
+    return JSON.parse(JSON.stringify(user));
   } catch (error) {
     console.log(error)
     return null;

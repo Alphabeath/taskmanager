@@ -1,4 +1,5 @@
-import { createSessionClient } from "../appwrite/appwrite-server";
+"use server";
+import { createSessionClient } from "../lib/appwrite/appwrite-server";
 import { ID, Permission, Role, Query } from "node-appwrite";
 import { Board, CreateBoard, BoardComplete, UpdateBoard } from "@/types/database.types";
 
@@ -11,17 +12,18 @@ export async function createBoard(
   userID: string
 ): Promise<Board> {
   const { tablesDB } = await createSessionClient();
-  return (await tablesDB.createRow(
+  const result = await tablesDB.createRow(
     DATABASE_ID,
     BOARDS_COLLECTION_ID,
     ID.unique(),
     data,
     [
-      Permission.read(Role.user(userID)), // Solo el usuario puede leer
-      Permission.update(Role.user(userID)), // Solo el usuario puede actualizar
-      Permission.delete(Role.user(userID)), // Solo el usuario puede eliminar
+      Permission.read(Role.user(userID)),
+      Permission.update(Role.user(userID)),
+      Permission.delete(Role.user(userID)),
     ]
-  )) as unknown as Board;
+  );
+  return JSON.parse(JSON.stringify(result)) as Board;
 }
 
 export async function getBoardsByUser(userID: string): Promise<Board[]> {
@@ -29,7 +31,7 @@ export async function getBoardsByUser(userID: string): Promise<Board[]> {
   const result = await tablesDB.listRows(DATABASE_ID, BOARDS_COLLECTION_ID, [
     Query.equal("userID", userID),
   ]);
-  return result.rows as unknown as Board[];
+  return JSON.parse(JSON.stringify(result.rows)) as Board[];
 }
 
 export async function updateBoard(
@@ -37,23 +39,25 @@ export async function updateBoard(
   data: UpdateBoard
 ): Promise<Board> {
   const { tablesDB } = await createSessionClient();
-  return (await tablesDB.updateRow(
+  const result = await tablesDB.updateRow(
     DATABASE_ID,
     BOARDS_COLLECTION_ID,
     boardID,
     data
-  )) as unknown as Board;
+  );
+  return JSON.parse(JSON.stringify(result)) as Board;
 }
 
 export async function getBoardComplete(
   boardID: string
 ): Promise<BoardComplete> {
   const { tablesDB } = await createSessionClient();
-  return (await tablesDB.getRow(
+  const result = await tablesDB.getRow(
     DATABASE_ID,
     BOARDS_COLLECTION_ID,
     boardID
-  )) as unknown as BoardComplete;
+  );
+  return JSON.parse(JSON.stringify(result)) as BoardComplete;
 }
 
 export async function deleteBoard(boardID: string): Promise<void> {

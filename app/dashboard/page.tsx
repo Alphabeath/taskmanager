@@ -1,14 +1,9 @@
-
+"use client";
+import { BoardList } from "@/components/board/board-list";
+import { useAuth } from "@/hooks/auth.hook";
+import { useBoards } from "@/hooks/boards.hook";
 
 export default function Page() {
-  return (
-    <div>
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-screen flex-1 rounded-xl md:min-h-min" />
-    </div>
-  );
+  const { user } = useAuth();
+  return <div>{user && <BoardList userId={user.$id} />}</div>;
 }

@@ -5,16 +5,9 @@ import {
   getBoardsByUser,
   getBoardComplete,
   deleteBoard,
-} from "@/lib/services/boards.service";
+} from "@/services/boards.service";
 import { Board, CreateBoard, UpdateBoard } from "@/types/database.types";
-
-export const boardsKeys = {
-  all: ["boards"] as const,
-  lists: () => [...boardsKeys.all, "list"] as const,
-  details: () => [...boardsKeys.all, "detail"] as const,
-  detail: (boardID: string) => [...boardsKeys.details(), boardID] as const,
-};
-
+import { boardsKeys } from "@/types/key-query.types";
 
 export const useBoards = (userID: string) => {
   const queryClient = useQueryClient();

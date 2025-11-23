@@ -21,8 +21,8 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <ModeToggle />
-            <Link href="/login"><Button variant="ghost">Iniciar sesión</Button></Link>
-            <Link href="/signup"><Button>Comenzar gratis</Button></Link>
+            <Link href="/login"><Button variant="ghost" className="cursor-pointer">Iniciar sesión</Button></Link>
+            <Link href="/signup"><Button className="cursor-pointer">Comenzar gratis</Button></Link>
           </div>
         </nav>
       </header>
@@ -45,11 +45,11 @@ export default function Home() {
             Aumenta tu productividad y colabora sin esfuerzo.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button size="lg" className="text-lg">
+            <Button size="lg" className="text-lg cursor-pointer">
               <Zap className="mr-2 h-5 w-5" />
               Comenzar ahora
             </Button>
-            <Button size="lg" variant="secondary" className="text-lg">
+            <Button size="lg" variant="secondary" className="text-lg cursor-pointer">
               Ver demo
             </Button>
           </div>
@@ -176,7 +176,7 @@ export default function Home() {
               Únete a miles de equipos que ya están logrando más con Task Manager.
               Comienza tu prueba gratuita hoy mismo.
             </p>
-            <Link href="/signup"><Button size="lg" variant="secondary" className="text-lg dark:bg-neutral-700">
+            <Link href="/signup"><Button size="lg" variant="secondary" className="text-lg dark:bg-neutral-700 cursor-pointer">
               Comenzar gratis
             </Button></Link>
           </CardContent>

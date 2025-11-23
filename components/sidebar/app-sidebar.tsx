@@ -30,7 +30,7 @@ const data = {
   navMain: [
     {
       title: "Tableros",
-      url: "#",
+      url: "/dashboard",
       icon: LayoutDashboard,
       isActive: false,
     },

@@ -1,6 +1,6 @@
 "use client";
 
-import {toast } from "sonner";
+import { toast } from "sonner";
 import {
   BadgeCheck,
   Bell,
@@ -9,7 +9,7 @@ import {
   LogOut,
 } from "lucide-react";
 import type { User } from "@/types/auth.types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,14 +26,13 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useRouter } from "next/navigation";
-import {useAuth} from "@/hooks/auth.hook";
-
+import { useAuth } from "@/hooks/auth.hook";
 
 function getInitials(name: string): string {
   return name
-    .split(' ')
-    .map(word => word[0])
-    .join('')
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
     .toUpperCase()
     .slice(0, 2);
 }
@@ -43,14 +42,13 @@ export function NavUser({ user }: { user: User }) {
   const initials = getInitials(user.name);
   const { logoutMutation } = useAuth();
   const router = useRouter();
-  
-  const handleLogout = () => {
+
+  const handleLogout = async () => {
     try {
-      logoutMutation.mutate();
+      await logoutMutation.mutateAsync();
       toast.success("Cierre de sesión exitoso");
       router.push("/");
-    }
-    catch (error) {
+    } catch (error) {
       toast.error("Error durante el cierre de sesión");
       console.error("Error durante el cierre de sesión:", error);
     }
@@ -66,7 +64,9 @@ export function NavUser({ user }: { user: User }) {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 {/* <AvatarImage src={user.name} alt={user.name} /> */}
-                <AvatarFallback className="rounded-lg font-semibold">{initials}</AvatarFallback>
+                <AvatarFallback className="rounded-lg font-semibold">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -85,7 +85,9 @@ export function NavUser({ user }: { user: User }) {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   {/* <AvatarImage src={user.name} alt="Sin nombre" /> */}
-                  <AvatarFallback className="rounded-lg font-semibold">{initials}</AvatarFallback>
+                  <AvatarFallback className="rounded-lg font-semibold">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -101,11 +103,11 @@ export function NavUser({ user }: { user: User }) {
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCard />
-                Billing
+                Facturación
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />
-                Notifications
+                Notificaciones
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
