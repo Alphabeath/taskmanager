@@ -84,7 +84,7 @@ export const Lists = ({ lists, boardID }: ListsProps) => {
               <Draggable key={list.$id} draggableId={list.$id} index={index}>
                 {(provided) => (
                   <div
-                    className="rounded-lg shadow-md w-72 shrink-0 flex flex-col overflow-hidden"
+                    className="rounded-lg shadow-md w-72 shrink-0 flex flex-col overflow-hidden text-black"
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     style={{

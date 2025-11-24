@@ -101,7 +101,7 @@ export const AddListCard = ({ boardID, nextIndex }: AddListCardProps) => {
           placeholder="Nombre de la lista"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="mb-3"
+          className="mb-3 border-gray-300 text-black"
           maxLength={50}
         />
 
@@ -115,7 +115,7 @@ export const AddListCard = ({ boardID, nextIndex }: AddListCardProps) => {
                 key={color}
                 type="button"
                 onClick={() => setBackground(color)}
-                className={`w-8 h-8 rounded-full border-2 transition-all ${
+                className={`w-8 h-8 rounded-full border-2 transition-all cursor-pointer ${
                   background === color
                     ? "border-gray-900 scale-110"
                     : "border-gray-300 hover:border-gray-400"
@@ -132,14 +132,15 @@ export const AddListCard = ({ boardID, nextIndex }: AddListCardProps) => {
             type="submit"
             size="sm"
             disabled={createList.isPending}
-            className="flex-1"
+            className="flex-1 cursor-pointer"
           >
             {createList.isPending ? "Creando..." : "Agregar"}
           </Button>
           <Button
             type="button"
             size="sm"
-            variant="ghost"
+            variant="destructive"
+            className="cursor-pointer hover:scale-105"
             onClick={handleCancel}
             disabled={createList.isPending}
           >
