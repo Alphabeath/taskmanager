@@ -19,7 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="h-svh overflow-hidden">
+      <SidebarInset className="h-svh-mb2 overflow-hidden">
         <header className="flex h-16 shrink-0 items-center gap-2 justify-between">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
