@@ -6,6 +6,7 @@ import {
   updateList,
   deleteList,
 } from "@/services/lists.service";
+import { boardsKeys } from "@/types/key-query.types";
 
 export const useLists = (boardID: string) => {
 
@@ -65,7 +66,9 @@ export const useCreateList = (boardID: string) => {
       }
     },
     onSuccess: () => {
+      // Invalidar tanto la query de listas como la del board completo
       queryClient.invalidateQueries({ queryKey: ["lists", boardID] });
+      queryClient.invalidateQueries({ queryKey: boardsKeys.detail(boardID) });
     },
   });
 };
