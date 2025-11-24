@@ -55,7 +55,8 @@ export async function getBoardComplete(
   const result = await tablesDB.getRow(
     DATABASE_ID,
     BOARDS_COLLECTION_ID,
-    boardID
+    boardID,
+    [Query.select(["*", "lists.*", "lists.tasks.*"])]
   );
   return JSON.parse(JSON.stringify(result)) as BoardComplete;
 }

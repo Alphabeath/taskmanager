@@ -21,8 +21,9 @@ export const useAuth = () => {
         onMutate: async () => {
             await queryClient.cancelQueries({ queryKey: authKeys.user() });
         },
-        onSettled: () => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: authKeys.user() });
+            queryClient.invalidateQueries({ queryKey: boardsKeys.lists() });
             refetch();
         },
     });
@@ -33,7 +34,7 @@ export const useAuth = () => {
         onMutate: async () => {
             await queryClient.cancelQueries({ queryKey: authKeys.user() });
         },
-        onSettled: () => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: authKeys.user() });
             queryClient.invalidateQueries({ queryKey: boardsKeys.lists() });
         },
