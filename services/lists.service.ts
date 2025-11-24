@@ -12,7 +12,7 @@ export async function createList(
     userID: string
 ): Promise<List> {
     const { tablesDB } = await createSessionClient();
-    await tablesDB.createRow(
+    const result = await tablesDB.createRow(
         DATABASE_ID,
         LISTS_COLLECTION_ID,
         ID.unique(),
@@ -21,7 +21,7 @@ export async function createList(
         Permission.update(Role.user(userID)),
         Permission.delete(Role.user(userID))]
     );
-    return JSON.parse(JSON.stringify(data)) as List;
+    return JSON.parse(JSON.stringify(result)) as List;
 }
 
 export async function getListsByBoard(boardID: string): Promise<ListWithTasks[]> {

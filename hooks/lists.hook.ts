@@ -8,6 +8,7 @@ import {
 } from "@/services/lists.service";
 
 export const useLists = (boardID: string) => {
+
   return useQuery({
     queryKey: ["lists", boardID],
     queryFn: () => getListsByBoard(boardID),
@@ -18,13 +19,20 @@ export const useLists = (boardID: string) => {
 export const useCreateList = (boardID: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: {
-      name: string;
-      index: number;
-      background?: string;
-      isArchived?: boolean;
-    }) => createList({ ...data, boardID }, "current"),
-    onMutate: async (newList) => {
+    mutationFn: ({
+      data,
+      userID,
+    }: {
+      data: {
+        name: string;
+        index: number;
+        background?: string;
+        isArchived?: boolean;
+        boardID: string;
+      };
+      userID: string;
+    }) => createList(data, userID),
+    onMutate: async ({ data: newList }) => {
       await queryClient.cancelQueries({ queryKey: ["lists", boardID] });
 
       const previousLists = queryClient.getQueryData<ListWithTasks[]>([
@@ -56,7 +64,7 @@ export const useCreateList = (boardID: string) => {
         queryClient.setQueryData(["lists", boardID], context.previousLists);
       }
     },
-    onSettled: () => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lists", boardID] });
     },
   });

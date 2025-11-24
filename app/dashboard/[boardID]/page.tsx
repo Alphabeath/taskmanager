@@ -5,7 +5,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button"; // Opcional, para acciones futuras from "@/components/ui/card";
 import { use } from "react";
 import { MoreHorizontal } from "lucide-react"; // Iconos recomendados
-
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { Lists } from "@/components/list/lists";
 interface PageProps {
   params: Promise<{ boardID: string }>;
 }
@@ -40,12 +42,7 @@ export default function Page({ params }: PageProps) {
 
   // Formateo simple de fecha
   const lastEdited = board.$updatedAt
-    ? new Date(board.$updatedAt).toLocaleDateString("es-ES", {
-        day: "numeric",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+    ? format(new Date(board.$updatedAt), "d 'de' MMMM, HH:mm", { locale: es })
     : "Fecha no disponible";
 
   // 2. UI PRINCIPAL
@@ -70,7 +67,9 @@ export default function Page({ params }: PageProps) {
 
       {/* --- ZONA INFERIOR: CANVAS DE LISTAS --- */}
       <main className="flex-1 overflow-x-auto overflow-y-hidden p-6 bg-muted/50 rounded-sm">
-        <div className="flex h-full gap-6 items-start"></div>
+        <div className="flex h-full gap-6 items-start">
+          <Lists lists={board.lists || []} boardID={boardID} />
+        </div>
       </main>
     </div>
   );
